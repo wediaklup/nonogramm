@@ -13,13 +13,15 @@ class Row:
     def generatePossibleCombinationsForRow(self):
         """Generate all possible combinations for a row. Size is size of
         the row meaning width of horizontal and height for vertical rows."""
+        combinations = []
         pixelsInRow = sum(self.descriptor)
         for bitCombination in range(2 ** self.size):
             if bin(bitCombination).count("1") != pixelsInRow:
                 continue
             if self.descriptor == generateDescriptor(list(map(lambda x: bool(int(x)),
                                                               list(f"{bitCombination:0{self.size}b}")))):
-                print(list(map(lambda x: bool(int(x)), list(f"{bitCombination:0{self.size}b}"))))
+                combinations.append(list(map(lambda x: bool(int(x)), list(f"{bitCombination:0{self.size}b}"))))
+        self.combinations = combinations
 
     def remove(self, row: list):
         """Row is 0 if low, 1 if high, -1 if unfilled"""
@@ -27,9 +29,9 @@ class Row:
         for i, p in enumerate(row):
             if p == -1:
                 continue
-            for j in range(self.size - 1, -1, -1):
+            for j in range(len(self.combinations) - 1, -1, -1):
                 if self.combinations[j][i] != bool(p):
-                    self.combinations.pop(i)
+                    self.combinations.pop(j)
 
     def getCommons(self):
         """Generate a list of all common values"""
@@ -58,7 +60,11 @@ class Game:
     def __init__(self, descriptorsX, descriptorsY, width, height):
         self.descriptorsX = descriptorsX
         self.descriptorsY = descriptorsY
+        self.width = width
+        self.height = height
         Row.size = width
+        self.rowsX = []
+        self.rowsY = []
         for x in descriptorsX:
             self.rowsX.append(Row(x))
         Row.size = height
@@ -76,7 +82,7 @@ class Game:
                 else:
                     self.plotRow(r.getCommons(), y)
             for x, c in enumerate(self.rowsY):
-                c.remove(self.getColumn(x))
+                c.remove(self.getColumn(x)) # remove removes to much: debug getColumn function and remove function
                 if len(c.combinations) == 1:
                     self.plotColumn(c.combinations[0], x)
                 else:
@@ -125,10 +131,10 @@ def generateDescriptor(row: list):
     if i != 0:
         descriptor.append(i)
     if len(descriptor) == 0:
-        return []
+        return [0]
     return descriptor
 
 
 if __name__ == '__main__':
-    g = Game([0, 2], [1, 1], 2, 2)
+    g = Game([[2], [2]], [[2], [2]], 2, 2)
     g.solve()
