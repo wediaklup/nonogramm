@@ -6,8 +6,9 @@ class Row:
     combinations: list
     size: int
 
-    def __init__(self, descriptor: list):
+    def __init__(self, descriptor: list, size):
         self.descriptor = descriptor
+        self.size = size
         self.generatePossibleCombinationsForRow()
 
     def generatePossibleCombinationsForRow(self):
@@ -62,18 +63,17 @@ class Game:
         self.descriptorsY = descriptorsY
         self.width = width
         self.height = height
-        Row.size = width
         self.rowsX = []
         self.rowsY = []
         for x in descriptorsX:
-            self.rowsX.append(Row(x))
-        Row.size = height
+            self.rowsX.append(Row(x, width))
         for y in descriptorsY:
-            self.rowsY.append(Row(y))
+            self.rowsY.append(Row(y, height))
         self.img = Image.new("L", (width, height), 128)
         self.pix = self.img.load()
 
     def solve(self):
+        turn = 0
         while True:
             for y, r in enumerate(self.rowsX):
                 r.remove(self.getRow(y))
@@ -87,7 +87,8 @@ class Game:
                     self.plotColumn(c.combinations[0], x)
                 else:
                     self.plotColumn(c.getCommons(), x)
-            self.img.save("temp.png")
+            self.img.save(f"{turn}.png")
+            turn += 1
 
     def getRow(self, y):
         t = []
@@ -136,5 +137,7 @@ def generateDescriptor(row: list):
 
 
 if __name__ == '__main__':
-    g = Game([[2], [2]], [[2], [2]], 2, 2)
+    g = Game([[0], [4], [6], [2, 2], [2, 2], [6], [4], [2], [2], [2], [0]],
+             [[0], [9], [9], [2, 2], [2, 2], [4], [4], [0]],
+             8, 11)
     g.solve()
